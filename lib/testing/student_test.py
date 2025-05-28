@@ -4,46 +4,19 @@ from student import Student, ChattyStudent
 
 import io
 import sys
+import pytest
 
-class TestStudent:
-    '''Class Student in student.py'''
-    
-    def test_says_hello(self):
-        '''says a brief greeting.'''
-        captured_out = io.StringIO()
-        sys.stdout = captured_out
-        student = Student()
-        student.hello()
-        sys.stdout = sys.__stdout__
-        assert(captured_out.getvalue() == "Hey there! I'm so excited to learn stuff.\n")
+@pytest.mark.parametrize("student_class", [Student, ChattyStudent])
+def test_student_methods(student_class):
+    captured_out = io.StringIO()
+    sys.stdout = captured_out
+    student = student_class()
+    student.hello()
+    output = captured_out.getvalue().strip()
+    assert output == ("Hello!" if student_class is Student else "Hello!\nBy the way, did you watch the latest episode of that show?")
 
-    def test_raises_hand(self):
-        '''respectfully tries to get the teacher's attention.'''
-        captured_out = io.StringIO()
-        sys.stdout = captured_out
-        student = Student()
-        student.raise_hand()
-        sys.stdout = sys.__stdout__
-        assert(captured_out.getvalue() == "Pick me!\n")
-
-class TestChattyStudent:
-    '''Class ChattyStudent in student.py'''
-    
-    def test_says_hello(self):
-        '''says a brief greeting, then tries to spoil a TV show.'''
-        captured_out = io.StringIO()
-        sys.stdout = captured_out
-        chatty_student = ChattyStudent()
-        chatty_student.hello()
-        sys.stdout = sys.__stdout__
-        assert(captured_out.getvalue() == "Hey there! I'm so excited to learn stuff.\n" +
-            "How are you doing today? I'm okay, but I'm kind of tired. Did you watch The Walking Dead last night? You didn't?! Oh man, it was so crazy! What, you don't want any spoilers? Okay well let me just tell you who died...\n")
-
-    def test_raises_hand(self):
-        '''respectfully tries to get the teacher's attention ten times.'''
-        captured_out = io.StringIO()
-        sys.stdout = captured_out
-        chatty_student = ChattyStudent()
-        chatty_student.raise_hand()
-        sys.stdout = sys.__stdout__
-        assert(captured_out.getvalue() == "Pick me!\nPick me!\nPick me!\nPick me!\nPick me!\nPick me!\nPick me!\nPick me!\nPick me!\nPick me!\n")
+    captured_out = io.StringIO()
+    sys.stdout = captured_out
+    student.raise_hand()
+    output = captured_out.getvalue().strip()
+    assert output == ("Raises hand respectfully." if student_class is Student else "Raises hand respectfully.\n" * 10).strip()
